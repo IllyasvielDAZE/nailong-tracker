@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#a6192e" />
+  <title>Where's Nailong? · 奶龙旅行地图</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root { --red:#a6192e; --ink:#17202b; --muted:#657281; --line:#e4e8ec; --cream:#fffdf7; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",Arial,sans-serif; background:#f4f5f7; color:var(--ink); }
+    header { background:var(--cream); border-bottom:1px solid var(--line); }
+    .head { max-width:1100px; margin:auto; display:flex; align-items:center; gap:14px; padding:17px 20px; }
+    .avatar { width:52px; height:52px; display:grid; place-items:center; background:#fff3b6; border:2px solid #f3d975; border-radius:17px; font-size:31px; }
+    h1 { font-size:22px; margin:0 0 3px; line-height:1.2; letter-spacing:-.5px; }
+    .sub { color:var(--muted); font-size:13px; }
+    .wrap { max-width:1100px; padding:22px 20px 46px; margin:auto; }
+    .grid { display:grid; grid-template-columns:minmax(0, 1.75fr) minmax(290px,1fr); gap:18px; align-items:start; }
+    .card { background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:0 3px 18px rgba(21,33,48,.04); overflow:hidden; }
+    .pad { padding:19px; }
+    h2 { font-size:17px; margin:0 0 12px; }
+    h3 { font-size:15px; margin:0 0 10px; }
+    p { line-height:1.55; }
+    #map { height:480px; width:100%; background:#eef1f1; }
+    .map-head { padding:17px 19px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .map-head strong { font-size:16px; }
+    .eyebrow { color:var(--muted); font-size:12px; }
+    .status { display:inline-flex; border-radius:100px; padding:5px 9px; font-size:12px; font-weight:650; background:#edf0f3; color:#596674; white-space:nowrap; }
+    .status.fresh { background:#e9f7ed; color:#267a43; }
+    .status.stale { background:#fff3e1; color:#936117; }
+    .map-footer { padding:12px 19px; font-size:12px; color:var(--muted); border-top:1px solid var(--line); }
+    .kpi { font-size:25px; line-height:1.2; letter-spacing:-.6px; font-weight:760; margin:5px 0 3px; }
+    .help { font-size:13px; color:var(--muted); line-height:1.55; }
+    .data-row { padding:9px 0; border-bottom:1px solid #f1f2f4; }
+    .data-row:last-child { border:0; }
+    .data-row .key { font-size:12px; color:var(--muted); margin-bottom:4px; }
+    .data-row .val { font-size:14px; font-weight:550; word-break:break-word; }
+    .timeline { padding:17px 19px; border-top:1px solid var(--line); }
+    .slider-top { display:flex; justify-content:space-between; gap:10px; margin-bottom:12px; align-items:center; }
+    input[type=range] { display:block; width:100%; accent-color:var(--red); cursor:pointer; }
+    .timeline-meta { display:flex; justify-content:space-between; gap:10px; margin-top:9px; color:var(--muted); font-size:12px; }
+    button { border:0; border-radius:10px; padding:11px 14px; font-size:14px; font-weight:690; cursor:pointer; }
+    button.primary { background:var(--red); color:#fff; }
+    button.secondary { background:#f0f2f4; color:var(--ink); }
+    button:disabled { opacity:.48; cursor:not-allowed; }
+    button.small { font-size:12px; padding:7px 10px; }
+    .buttons { display:flex; flex-wrap:wrap; gap:9px; margin:13px 0 0; }
+    #reportBox { margin-top:12px; padding:13px; background:#fafbfc; border-radius:11px; border:1px solid var(--line); display:none; }
+    .msg { font-size:13px; margin-top:11px; padding:11px 12px; border-radius:9px; background:#f2f4f6; color:#485563; line-height:1.5; }
+    .msg.error { background:#fff0ee; color:#a03328; }
+    .msg.ok { background:#eaf7ee; color:#21713f; }
+    .note { border:1px solid #f4e2af; background:#fff9e9; padding:12px 14px; border-radius:12px; font-size:12px; line-height:1.6; color:#756033; margin-top:15px; }
+    .tiny { font-size:12px; color:var(--muted); }
+    .nailong-pin { font-size:27px; text-align:center; line-height:36px; background:#fff5bd; border:2px solid var(--red); border-radius:50%; box-shadow:0 3px 12px #0003; }
+    footer { margin-top:19px; color:var(--muted); text-align:center; font-size:12px; }
+    @media(max-width:800px) { .grid{grid-template-columns:1fr} #map{height:390px} .wrap{padding:14px 12px 32px} .head{padding:14px} }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="head"><div class="avatar" aria-hidden="true">🦖</div>
+      <div><h1>Where's Nailong?</h1><div class="sub">奶龙去哪了？ · Stony Brook University</div></div>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="grid">
+      <section class="card">
+        <div class="map-head"><div><strong>奶龙旅行地图</strong><div class="eyebrow">基于学生主动上报 · 不是持续 GPS 追踪</div></div><span id="freshness" class="status">尚无记录</span></div>
+        <div id="map" role="region" aria-label="奶龙位置地图"></div>
+        <div class="timeline">
+          <div class="slider-top"><div><h3 style="margin:0">🕒 时间轴回放</h3><div class="tiny" id="timelineLabel">等待第一条上报</div></div><button type="button" id="latestBtn" class="secondary small">返回最新</button></div>
+          <input type="range" id="timeline" min="0" max="0" value="0" disabled aria-label="选择历史上报时间" />
+          <div class="timeline-meta"><span id="startTime">起点：—</span><span id="endTime">终点：—</span></div>
+        </div>
+        <div class="map-footer">地图上的虚线只连接已上报地点，不代表奶龙实际走过的路线。</div>
+      </section>
+      <aside>
+        <div class="card pad">
+          <h2>📍 最近一次上报</h2>
+          <div id="latestPlace" class="kpi">还没有位置</div>
+          <p id="latestWhen" class="help" style="margin:5px 0 14px">第一个发现奶龙的人，可以帮它留下足迹。</p>
+          <div class="data-row"><div class="key">上报总数</div><div id="reportCount" class="val">0</div></div>
+          <div class="data-row"><div class="key">最新定位精度</div><div id="accuracyText" class="val">—</div></div>
+          <div class="data-row"><div class="key">历史说明</div><div class="val">每次确认上报，留下一个时间点</div></div>
+        </div>
+        <div id="checkinCard" class="card pad" style="margin-top:17px">
+          <h2>✨ 我找到奶龙了！</h2>
+          <p class="help" style="margin:0">只有你确实在奶龙旁边时才提交。点击获取坐标后，系统会让你再次确认，不会自动上传位置。</p>
+          <div class="buttons"><button type="button" id="locateBtn" class="primary">获取我的位置</button></div>
+          <div id="reportBox" aria-live="polite">
+            <div class="tiny">本次准备提交的位置</div>
+            <div id="previewCoordinates" style="font-weight:650;margin:7px 0 5px">—</div>
+            <div class="tiny" id="previewAccuracy">—</div>
+            <div class="buttons"><button type="button" id="submitBtn" class="primary" disabled>确认奶龙就在这里并上报</button><button type="button" id="cancelBtn" class="secondary">取消</button></div>
+          </div>
+          <div id="message" class="msg" aria-live="polite">本网站只保存你明确确认提交的坐标，不保存姓名或联系方式。</div>
+          <div class="note">⚠️ 扫描二维码不等于证明人在奶龙旁边。上线后如遇到虚假上报，可添加照片审核、登录、验证码和限流。</div>
+        </div>
+      </aside>
+    </div>
+    <footer>Made for a wandering Nailong · 校园社区实验项目</footer>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 修改这两个值。只能填浏览器可公开使用的 publishable key；绝对不要放 secret key。
+    const SUPABASE_URL = 'https://fljjcndvslkgoxoifvcr.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_jPejMFqxr_cuWdR6ZoT38Q_v_VSyq0e';
+
+    // 大致围绕 Stony Brook University 主校区，供地图初始定位使用。
+    const CAMPUS_CENTER = [40.9124, -73.1237];
+    const map = L.map('map', { zoomControl: true }).setView(CAMPUS_CENTER, 15);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    const pinIcon = L.divIcon({className:'', html:'<div class="nailong-pin">🦖</div>', iconSize:[40,40], iconAnchor:[20,20]});
+    const locationIcon = L.divIcon({className:'', html:'<div style="width:18px;height:18px;background:#3478cf;border:3px solid white;border-radius:50%;box-shadow:0 0 0 2px #3478cf"></div>', iconSize:[18,18], iconAnchor:[9,9]});
+    let currentMarker = null, trail = null, previewMarker = null;
+    let records = [], showingLatest = true, pendingLocation = null, dataClient = null;
+    const $ = id => document.getElementById(id);
+    const configured = !SUPABASE_URL.includes('YOUR_PROJECT') && !SUPABASE_PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY');
+    if (configured) {
+      dataClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    }
+
+    function fmt(iso) {
+      return new Date(iso).toLocaleString('zh-CN', {
+        timeZone:'America/New_York', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false
+      }) + '（纽约时间）';
+    }
+    function message(msg, type='') {
+      $('message').textContent = msg;
+      $('message').className = 'msg' + (type ? ' ' + type : '');
+    }
+    function render(index, pan=false) {
+      if (!records.length) return;
+      index = Math.min(records.length - 1, Math.max(0,index));
+      const r = records[index];
+      const points = records.slice(0,index+1).map(row => [row.latitude,row.longitude]);
+      if (currentMarker) map.removeLayer(currentMarker);
+      if (trail) map.removeLayer(trail);
+      trail = L.polyline(points,{color:'#a6192e',weight:3,opacity:.76,dashArray:'6 9'}).addTo(map);
+      currentMarker = L.marker([r.latitude,r.longitude],{icon:pinIcon}).addTo(map);
+      currentMarker.bindPopup('🦖 奶龙上报点<br>' + fmt(r.created_at) + '<br>定位精度约 ±' + Math.round(r.accuracy_m) + ' 米');
+      if (pan) map.panTo([r.latitude,r.longitude]);
+      $('timelineLabel').textContent = `第 ${index+1} / ${records.length} 次上报 · ${fmt(r.created_at)}`;
+      $('timeline').value = String(index);
+      $('latestBtn').disabled = (index === records.length - 1);
+    }
+    function displayLatest() {
+      if (!records.length) return;
+      const r = records[records.length - 1];
+      $('latestPlace').textContent = `${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}`;
+      $('latestPlace').style.fontSize = '19px';
+      $('latestWhen').textContent = `最后上报：${fmt(r.created_at)}`;
+      $('accuracyText').textContent = `约 ±${Math.round(r.accuracy_m)} 米`;
+      const mins = (Date.now() - new Date(r.created_at).getTime()) / 60000;
+      const label = $('freshness');
+      if (mins < 30 && mins >= -2) { label.className = 'status fresh'; label.textContent = '30分钟内上报'; }
+      else { label.className = 'status stale'; label.textContent = '位置可能已过时'; }
+    }
+    async function loadReports() {
+      if (!dataClient) return;
+      const {data,error} = await dataClient.from('nailong_reports')
+        .select('id,latitude,longitude,accuracy_m,created_at')
+        .order('created_at',{ascending:false}).limit(1000);
+      if (error) { message('数据库读取失败：' + error.message,'error'); return; }
+      records = (data || []).reverse();
+      $('reportCount').textContent = `${records.length}${records.length === 1000 ? '（最近1000条）' : ''}`;
+      if (!records.length) return;
+      $('timeline').disabled = false;
+      $('timeline').max = String(records.length - 1);
+      $('startTime').textContent = '起点：' + fmt(records[0].created_at);
+      $('endTime').textContent = '终点：' + fmt(records[records.length-1].created_at);
+      displayLatest();
+      const index = showingLatest ? records.length - 1 : Number($('timeline').value);
+      render(index, showingLatest);
+    }
+    $('timeline').addEventListener('input', event => {
+      const index = Number(event.target.value);
+      showingLatest = (index === records.length - 1);
+      render(index, true);
+    });
+    $('latestBtn').addEventListener('click', () => { showingLatest = true; render(records.length - 1, true); });
+
+    $('locateBtn').addEventListener('click', () => {
+      if (!dataClient) { message('尚未连接数据库。请先按 README 配置 Supabase。','error'); return; }
+      if (!navigator.geolocation) { message('当前浏览器不支持定位。请用手机的 Safari / Chrome 打开 HTTPS 网站。','error'); return; }
+      $('locateBtn').disabled = true;
+      message('正在获取当前位置。请在手机弹窗中允许使用定位……');
+      navigator.geolocation.getCurrentPosition(pos => {
+        $('locateBtn').disabled = false;
+        const {latitude,longitude,accuracy} = pos.coords;
+        if (!(latitude >= 40.88 && latitude <= 40.95 && longitude >= -73.17 && longitude <= -73.08)) {
+          message('当前位置不在预设的 Stony Brook 校园周边范围内，不能提交。','error'); return;
+        }
+        if (!Number.isFinite(accuracy) || accuracy > 100) {
+          message(`当前定位精度约 ±${Math.round(accuracy)} 米，超过100米。建议走到室外，重新尝试定位。`,'error'); return;
+        }
+        pendingLocation = {latitude,longitude,accuracy_m:accuracy};
+        $('reportBox').style.display = 'block';
+        $('previewCoordinates').textContent = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+        $('previewAccuracy').textContent = `手机报告的误差半径：约 ±${Math.round(accuracy)} 米`;
+        $('submitBtn').disabled = false;
+        if (previewMarker) map.removeLayer(previewMarker);
+        previewMarker = L.marker([latitude,longitude],{icon:locationIcon}).addTo(map);
+        map.panTo([latitude,longitude]);
+        message('定位获取成功。请确认奶龙真的就在你身边，再点击上报。','ok');
+      }, error => {
+        $('locateBtn').disabled = false;
+        const reasons = {1:'没有获得定位授权。请允许浏览器访问当前位置。',2:'手机暂时无法定位，请换到空旷处重试。',3:'定位超时，请重新尝试。'};
+        message(reasons[error.code] || '获取定位失败。','error');
+      }, { enableHighAccuracy:true,timeout:15000,maximumAge:0 });
+    });
+    function clearPreview() {
+      pendingLocation = null;
+      $('reportBox').style.display = 'none';
+      $('submitBtn').disabled = true;
+      if (previewMarker) {map.removeLayer(previewMarker); previewMarker = null;}
+    }
+    $('cancelBtn').addEventListener('click', () => {clearPreview(); message('已取消。没有上传你的坐标。');});
+    $('submitBtn').addEventListener('click', async () => {
+      if (!pendingLocation || !dataClient) return;
+      $('submitBtn').disabled = true;
+      message('正在提交这一次的位置记录……');
+      const {error} = await dataClient.from('nailong_reports').insert([pendingLocation]);
+      if (error) { $('submitBtn').disabled = false; message('提交失败：' + error.message,'error'); return; }
+      clearPreview(); showingLatest = true;
+      message('奶龙足迹已成功提交！感谢帮奶龙记录旅程 🦖','ok');
+      await loadReports();
+    });
+    if (location.search.includes('report=1')) {
+      document.title = '我找到奶龙了！ · Where\'s Nailong?';
+      // 将扫描二维码的访客带到上报卡片。
+      setTimeout(() => $('checkinCard').scrollIntoView({behavior:'smooth',block:'start'}),500);
+    }
+    if (!configured) { message('演示界面已加载。连接 Supabase 后，才会显示真实上报和允许提交。'); }
+    else { loadReports(); setInterval(loadReports,30000); }
+  </script>
+</body>
+</html>
