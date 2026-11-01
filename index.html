@@ -59,6 +59,33 @@
     .lang-switch button[aria-pressed="true"] { background:var(--red); color:white; }
     footer { margin-top:19px; color:var(--muted); text-align:center; font-size:12px; }
     @media(max-width:800px) { .grid{grid-template-columns:1fr} #map{height:390px} .wrap{padding:14px 12px 32px} .head{padding:14px;gap:9px} .avatar{width:43px;height:43px;font-size:26px;flex-shrink:0} .lang-switch button{padding:7px 8px;font-size:11px} h1{font-size:19px} }
+
+    .quick-nav { background:#fff; border-bottom:1px solid var(--line); padding:9px max(14px, calc((100% - 1060px)/2)); display:flex; gap:16px; flex-wrap:wrap; }
+    .quick-nav a { color:var(--red); text-decoration:none; font-weight:650; font-size:13px; }
+    .quick-nav a:hover { text-decoration:underline; }
+    /* Campus cards / student submissions */
+    .section-intro { margin:0 0 16px; color:var(--muted); font-size:13px; line-height:1.7; }
+    .campus-section { margin-top:20px; }
+    .campus-grid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(295px,1fr); gap:18px; align-items:start; }
+    .field { margin-bottom:13px; }
+    .field label { display:block; margin-bottom:5px; font-size:13px; font-weight:650; }
+    .field input,.field select,.field textarea { width:100%; border:1px solid #cfd7df; border-radius:9px; padding:10px 11px; color:var(--ink); background:white; font:inherit; font-size:14px; }
+    .field textarea { min-height:110px; resize:vertical; }
+    .field :is(input,select,textarea):focus { outline:2px solid #b9cbe0; outline-offset:1px; }
+    .mini-card { padding:15px; border:1px solid #e1e8e5; border-radius:12px; background:#fbfffc; margin-bottom:11px; }
+    .mini-card h3 { margin:5px 0 7px; font-size:16px; }
+    .mini-card .body { font-size:13px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; margin:8px 0 10px; }
+    .card-meta { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--muted); font-size:12px; }
+    .topic { background:#edf3f0; color:#326a51; padding:4px 8px; border-radius:99px; font-size:11px; font-weight:700; }
+    .rules { background:#fff9e9; border:1px solid #f2dfb0; padding:13px; border-radius:10px; font-size:12px; line-height:1.7; margin:13px 0; }
+    .agree { display:flex; align-items:start; gap:10px; font-size:13px; line-height:1.55; margin:12px 0; }
+    .agree input { margin-top:4px; flex-shrink:0; accent-color:var(--red); }
+    .flag-tools { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .flag-tools select { border:1px solid #d8dde3; background:white; border-radius:7px; padding:6px; font-size:12px; max-width:210px; }
+    .flag-tools button { border:1px solid #e1e5e9; background:white; color:#5f6d78; font-size:12px; padding:6px 9px; }
+    .linkline { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .linkline a { color:var(--red); font-size:12px; }
+    @media(max-width:800px) { .campus-grid {grid-template-columns:1fr} }
   </style>
 </head>
 <body>
@@ -68,6 +95,7 @@
       <div class="lang-switch" role="group" aria-label="Language / 语言"><button type="button" id="langZh" class="small" aria-pressed="true">中文</button><button type="button" id="langEn" class="small" aria-pressed="false">English</button></div>
     </div>
   </header>
+  <nav class="quick-nav" aria-label="Main navigation"><a href="#checkinCard" data-i18n="navCheckin">🐸 扫码打卡</a><a href="#campusCards" data-i18n="navCards">🏫 浏览校园卡</a><a href="#submitCampusCard" data-i18n="navSubmit">＋ 投稿卡片</a></nav>
   <main class="wrap">
     <div class="grid">
       <section class="card">
@@ -84,7 +112,7 @@
         <div class="card pad">
           <h2 data-i18n="latestTitle">📍 最近一次上报</h2>
           <div id="latestPlace" class="kpi" data-i18n="noLocation">还没有位置</div>
-          <p id="latestWhen" class="help" style="margin:5px 0 14px" data-i18n="firstFinder">发现奶蛙的人，可以帮它留下足迹。</p>
+          <p id="latestWhen" class="help" style="margin:5px 0 14px" data-i18n="firstFinder">第一个发现奶蛙的人，可以帮它留下足迹。</p>
           <div class="data-row"><div class="key" data-i18n="reportTotal">上报总数</div><div id="reportCount" class="val">0</div></div>
           <div class="data-row"><div class="key" data-i18n="accuracyTitle">最新定位精度</div><div id="accuracyText" class="val">—</div></div>
           <div class="data-row"><div class="key" data-i18n="historyTitle">历史说明</div><div class="val" data-i18n="historyDesc">每次确认上报，留下一个时间点</div></div>
@@ -103,6 +131,49 @@
         </div>
       </aside>
     </div>
+
+    <section class="campus-section" id="campusCards">
+      <div class="card pad" style="margin-bottom:16px">
+        <h2 data-i18n="campusHeading">🏫 奶蛙校园探索卡</h2>
+        <p class="section-intro" data-i18n="campusIntro">发现校园里的好地方？分享建筑用途、学习资源和实用贴士。投稿经人工审核后才会公开。</p>
+        <div class="linkline"><a href="#submitCampusCard" data-i18n="jumpForm">＋ 我要投稿校园卡</a><span class="tiny" data-i18n="noOfficial">独立学生项目 · 非学校官方信息</span></div>
+      </div>
+      <div class="campus-grid">
+        <div class="card pad">
+          <h2 data-i18n="approvedCards">✅ 已审核校园卡</h2>
+          <p class="help" style="margin-top:-4px" data-i18n="approvedIntro">只有审核通过的投稿才会在这里展示。</p>
+          <div id="campusCardList" aria-live="polite"><p class="help" data-i18n="loadingCards">正在加载校园卡…</p></div>
+          <div id="cardsMessage" class="msg" style="display:none" aria-live="polite"></div>
+        </div>
+        <div class="card pad" id="submitCampusCard">
+          <h2 data-i18n="submitCampusTitle">✍️ 分享一张校园卡</h2>
+          <p class="help" data-i18n="submitCampusHelp">无需注册，不需要填写姓名。填写建筑名称及一条对其他学生有帮助的信息。</p>
+          <form id="campusForm">
+            <div class="field"><label for="buildingName" data-i18n="buildingLabel">校园建筑 / 位置名称</label><input id="buildingName" name="buildingName" maxlength="80" minlength="2" required placeholder="例如 Melville Library / SAC" data-i18n-placeholder="buildingPlaceholder" autocomplete="off" /></div>
+            <div class="field"><label for="campusCategory" data-i18n="categoryLabel">卡片类型</label>
+              <select id="campusCategory" required>
+                <option value="study" data-i18n="categoryStudy">📚 学习空间</option>
+                <option value="resources" data-i18n="categoryResources">🧭 校园资源</option>
+                <option value="food" data-i18n="categoryFood">🍽️ 餐饮与休息</option>
+                <option value="tip" data-i18n="categoryTip">💡 实用贴士</option>
+                <option value="fun" data-i18n="categoryFun">🐸 趣闻和发现</option>
+              </select>
+            </div>
+            <div class="field"><label for="campusTitle" data-i18n="cardTitleLabel">卡片标题</label><input id="campusTitle" maxlength="80" minlength="3" required placeholder="例如 适合自习的安静角落" data-i18n-placeholder="cardTitlePlaceholder" autocomplete="off" /></div>
+            <div class="field"><label for="campusBody" data-i18n="cardBodyLabel">介绍 / 小贴士（15–500字）</label><textarea id="campusBody" minlength="15" maxlength="500" required placeholder="这里适合做什么？有什么新生应该知道的？" data-i18n-placeholder="cardBodyPlaceholder"></textarea></div>
+            <div class="rules">
+              <strong data-i18n="rulesHeading">投稿规则与免责声明</strong>
+              <div data-i18n="rulesContent">仅分享与校园公共空间有关、自己有根据的信息。禁止辱骂、歧视、骚扰、仇恨言论、色情、暴力威胁、广告、虚假信息及个人隐私（姓名、学号、电话、宿舍房间等）。不发布无授权的照片或他人信息。投稿由学生提供，不代表学校官方意见；信息可能不准确或过时，请以官方指引为准。管理员有权拒绝或移除内容。</div>
+            </div>
+            <label class="agree"><input id="agreeRules" type="checkbox" required /><span data-i18n="agreeText">我确认内容适合公开分享，理解投稿需要审核，并同意遵守以上规则。</span></label>
+            <button id="sendCampusCard" class="primary" type="submit" data-i18n="sendCard">提交审核</button>
+            <div id="campusFormMessage" class="msg" style="margin-top:13px" aria-live="polite" data-i18n="pendingExplanation">提交后不会立即公开。管理员审核后才会显示在校园卡列表。</div>
+          </form>
+        </div>
+      </div>
+      <div class="note" style="margin-top:16px" data-i18n="projectDisclaimer">免责声明：Milk Frog 是学生自发项目，不隶属于或代表 Stony Brook University。学生投稿及位置上报仅供探索交流，不保证准确、及时或安全；请遵守学校规定，勿将奶蛙放入厕所、更衣室、私人或危险区域。项目方会尽合理努力审核与移除不当内容；任何免责声明均不排除法律不能排除的责任。</div>
+    </section>
+    <footer data-i18n="footer">Made for a wandering Milk Frog · 校园社区娱乐项目</footer>
   </main>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -124,18 +195,30 @@
         foundTitle:'✨ 我找到奶蛙了！',reportHelp:'只有你确实在奶蛙旁边时才提交。点击获取坐标后，系统会让你再次确认，不会自动上传位置。',
         locateButton:'获取我的位置',pendingTitle:'本次准备提交的位置',submitButton:'确认奶蛙就在这里并上报',cancelButton:'取消',
         privacy:'本网站只保存你明确确认提交的坐标，不保存姓名或联系方式。',
+        fraudWarning:'⚠️ 扫描二维码不等于证明人在奶蛙旁边。遇到虚假上报时，可添加照片审核、登录、验证码和限流。',
         footer:'Made for a wandering Milk Frog · 校园社区实验项目',timezone:'（纽约时间）',
         popupReport:'🐸 奶蛙上报点',accuracyApprox:'定位精度约 ±{meters} 米',reportNumber:'第 {index} / {total} 次上报 · {date}',
         latestWhen:'最后上报：{date}',fresh:'30分钟内上报',stale:'位置可能已过时',
         countLimit:'（最近1000条）',startTime:'起点：{date}',endTime:'终点：{date}',
         notConfigured:'尚未连接数据库。请先配置 Supabase。',noGPS:'当前浏览器不支持定位。请用手机 Safari / Chrome 打开 HTTPS 网站。',
         locating:'正在获取当前位置。请在手机弹窗中允许使用定位……',outOfCampus:'当前位置不在预设的 Stony Brook 校园周边范围内，不能提交。',
-        poorAccuracy:'当前定位精度约 ±{meters} 米，超过100米。建议走到室外重新尝试。',previewAccuracy:'手机报告的误差半径：约 ±{meters} 米',
+        poorAccuracy:'当前定位精度约 ±{meters} 米，超过100米。请靠近窗户或开启 Wi-Fi 定位后重试，奶蛙仍须留在室内。',previewAccuracy:'手机报告的误差半径：约 ±{meters} 米',
         gpsSuccess:'定位获取成功。请确认奶蛙真的就在你身边，再点击上报。',
-        gpsDenied:'没有获得定位授权。请允许浏览器访问当前位置。',gpsUnavailable:'手机暂时无法定位，请换到空旷处重试。',
+        gpsDenied:'没有获得定位授权。请允许浏览器访问当前位置。',gpsUnavailable:'手机暂时无法定位，请靠近窗户重试，奶蛙仍须留在室内。',
         gpsTimeout:'定位超时，请重新尝试。',gpsFailed:'获取定位失败。',cancelled:'已取消。没有上传你的坐标。',
         submitting:'正在提交这一次的位置记录……',submitFailed:'提交失败：{error}',reportSuccess:'奶蛙足迹已成功提交！感谢帮奶蛙记录旅程 🐸',
         loadFailed:'数据库读取失败：{error}',demo:'演示界面已加载。连接 Supabase 后，才会显示真实上报和允许提交。',
+        navCheckin:'🐸 扫码打卡',navCards:'🏫 浏览校园卡',navSubmit:'＋ 投稿卡片',
+        campusHeading:'🏫 奶蛙校园探索卡',campusIntro:'发现校园里的好地方？分享建筑用途、学习资源和实用贴士。投稿经人工审核后才会公开。',jumpForm:'＋ 我要投稿校园卡',noOfficial:'独立学生项目 · 非学校官方信息',
+        approvedCards:'✅ 已审核校园卡',approvedIntro:'只有审核通过的投稿才会在这里展示。',loadingCards:'正在加载校园卡…',noCards:'还没有审核通过的校园卡，欢迎提交第一张！',
+        submitCampusTitle:'✍️ 分享一张校园卡',submitCampusHelp:'无需注册，也不用填写姓名。分享一个适合学生了解的校园建筑或公共空间。',
+        buildingLabel:'校园建筑 / 位置名称',buildingPlaceholder:'例如 Melville Library / SAC',categoryLabel:'卡片类型',categoryStudy:'📚 学习空间',categoryResources:'🧭 校园资源',categoryFood:'🍽️ 餐饮与休息',categoryTip:'💡 实用贴士',categoryFun:'🐸 趣闻和发现',
+        cardTitleLabel:'卡片标题',cardTitlePlaceholder:'例如 适合自习的安静角落',cardBodyLabel:'介绍 / 小贴士（15–500字）',cardBodyPlaceholder:'这里适合做什么？有什么新生应该知道的？',
+        rulesHeading:'投稿规则与免责声明',rulesContent:'仅分享校园公共空间内有根据的信息。禁止辱骂、歧视、骚扰、仇恨言论、色情、威胁、广告、虚假信息及个人隐私（姓名、学号、联系方式、宿舍房号等）。不上传未经允许的他人信息。投稿不代表学校官方意见，内容可能有误或过时。管理员有权拒绝或移除。',
+        agreeText:'我确认内容适合公开，理解投稿需要审核，并同意遵守规则。',sendCard:'提交审核',pendingExplanation:'提交后不会立即公开。管理员审核后才会显示在校园卡列表。',
+        projectDisclaimer:'免责声明：Milk Frog 是学生自发项目，不隶属于或代表 Stony Brook University。学生投稿及位置上报仅供探索交流，不保证准确、及时或安全；请遵守学校规定，勿将奶蛙放入厕所、更衣室、私人或危险区域。项目方会尽合理努力审核与移除不当内容；任何免责声明均不排除法律不能排除的责任。',
+        cardsLoadFail:'校园卡暂时无法加载：{error}',cardSendFail:'投稿失败：{error}',cardSending:'正在提交校园卡…',cardSuccess:'投稿收到！进入待审核队列，通过后将公开。感谢你的分享！',cardRulesRequired:'提交前请先确认投稿规则。',cardTooShort:'请填写完整的建筑名称、标题和至少15个字符的介绍。',
+        reportCard:'举报此卡片',reportReasonLabel:'举报原因',reportSpam:'垃圾广告',reportOffensive:'不当或攻击性内容',reportPrivacy:'泄露个人隐私',reportInaccurate:'信息有误',reportOther:'其他',sendReport:'发送举报',reportThanks:'举报已收到，我们会人工检查。',reportFailed:'举报失败：{error}',cardPosted:'投稿时间：{date}',
         qrPageTitle:'我找到奶蛙了！ · Where\'s Milk Frog?'
       },
       en: {
@@ -148,23 +231,35 @@
         foundTitle:'✨ I found Milk Frog!',reportHelp:'Only submit a location when you are actually next to Milk Frog. You will be asked to confirm before any coordinates are uploaded.',
         locateButton:'Get my location',pendingTitle:'Location to submit',submitButton:'Confirm Milk Frog is here & submit',cancelButton:'Cancel',
         privacy:'We only save coordinates you explicitly confirm. No names or contact information are collected.',
+        fraudWarning:'⚠️ Scanning the QR code does not prove that you are next to Milk Frog. Photo verification, sign-in, CAPTCHA, and rate limits may be added to prevent false reports.',
         footer:'Made for a wandering Milk Frog · A campus community project',timezone:' (New York time)',
         popupReport:'🐸 Milk Frog sighting',accuracyApprox:'GPS accuracy: ±{meters} m',reportNumber:'Sighting {index} of {total} · {date}',
         latestWhen:'Last reported: {date}',fresh:'Reported within 30 min',stale:'Location may be outdated',
         countLimit:' (latest 1,000)',startTime:'First: {date}',endTime:'Latest: {date}',
         notConfigured:'Database not connected. Please configure Supabase first.',noGPS:'Your browser does not support GPS. Open this HTTPS site in Safari or Chrome on your phone.',
         locating:'Getting your location. Please allow location access when prompted…',outOfCampus:'Your location is outside the permitted Stony Brook campus area.',
-        poorAccuracy:'GPS accuracy is about ±{meters} m, above the 100 m limit. Try again outdoors.',previewAccuracy:'Estimated GPS uncertainty: ±{meters} m',
+        poorAccuracy:'GPS accuracy is about ±{meters} m, above the 100 m limit. Try near a window or enable Wi-Fi positioning. Keep Milk Frog indoors.',previewAccuracy:'Estimated GPS uncertainty: ±{meters} m',
         gpsSuccess:'Location acquired. Please make sure Milk Frog is actually beside you before submitting.',
-        gpsDenied:'Location permission denied. Please allow access in your browser.',gpsUnavailable:'Location unavailable. Try again in an open area.',
+        gpsDenied:'Location permission denied. Please allow access in your browser.',gpsUnavailable:'Location unavailable. Try near a window, keeping Milk Frog indoors.',
         gpsTimeout:'Location request timed out. Please try again.',gpsFailed:'Unable to get location.',cancelled:'Cancelled. No coordinates were uploaded.',
         submitting:'Submitting this sighting…',submitFailed:'Submission failed: {error}',reportSuccess:'Milk Frog’s new location has been saved. Thanks for helping map the journey! 🐸',
         loadFailed:'Could not load sightings: {error}',demo:'Demo mode: connect Supabase to read and submit real sightings.',
+        navCheckin:'🐸 Check in',navCards:'🏫 Campus cards',navSubmit:'＋ Share a card',
+        campusHeading:'🏫 Milk Frog Campus Discovery Cards',campusIntro:'Know a useful spot on campus? Share building tips, study spaces, and discoveries. All submissions require review before they appear.',jumpForm:'＋ Add a campus card',noOfficial:'Independent student project · Not official university information',
+        approvedCards:'✅ Approved Campus Cards',approvedIntro:'Only reviewed and approved submissions appear here.',loadingCards:'Loading campus cards…',noCards:'No approved campus cards yet. Be the first to share one!',
+        submitCampusTitle:'✍️ Share a Campus Card',submitCampusHelp:'No account or name required. Tell other students something useful about a campus building or public space.',
+        buildingLabel:'Building / Campus place',buildingPlaceholder:'e.g. Melville Library / SAC',categoryLabel:'Card category',categoryStudy:'📚 Study space',categoryResources:'🧭 Campus resource',categoryFood:'🍽️ Food & breaks',categoryTip:'💡 Practical tip',categoryFun:'🐸 Fun discovery',
+        cardTitleLabel:'Card title',cardTitlePlaceholder:'e.g. A quiet corner to study',cardBodyLabel:'Description / Tip (15–500 characters)',cardBodyPlaceholder:'What can people do here? What should newcomers know?',
+        rulesHeading:'Community rules & disclaimer',rulesContent:'Share relevant, well-grounded information about public campus spaces. No insults, discrimination, harassment, hate, sexual content, threats, spam, misinformation, or personal details (names, student IDs, contacts, dorm rooms, etc.). Do not share others’ private information. Posts are student submissions, not official university advice; they may be wrong or outdated. Moderators may reject or remove content.',
+        agreeText:'I confirm this is suitable for public sharing and agree to the rules and pre-publication review.',sendCard:'Submit for review',pendingExplanation:'Your card will not be public immediately. It appears only after a moderator approves it.',
+        projectDisclaimer:'Disclaimer: Milk Frog is an independent student project, not affiliated with or endorsed by Stony Brook University. Student-submitted tips and sightings are for exploration only and may be inaccurate, outdated, or unsafe to rely on. Follow university rules: never place Milk Frog in restrooms, changing rooms, private or hazardous spaces. Moderators aim to review and remove inappropriate content. Nothing here excludes liability that cannot legally be excluded.',
+        cardsLoadFail:'Could not load campus cards: {error}',cardSendFail:'Submission failed: {error}',cardSending:'Submitting your campus card…',cardSuccess:'Thank you! Your card is pending review and will appear after approval.',cardRulesRequired:'Please accept the community rules before submitting.',cardTooShort:'Please enter a building, a title, and at least 15 characters of description.',
+        reportCard:'Report this card',reportReasonLabel:'Report reason',reportSpam:'Spam / ads',reportOffensive:'Harassment or harmful content',reportPrivacy:'Personal information',reportInaccurate:'Incorrect information',reportOther:'Other',sendReport:'Send report',reportThanks:'Report received. We will review it.',reportFailed:'Could not submit report: {error}',cardPosted:'Submitted: {date}',
         qrPageTitle:'I found Milk Frog! · Where\'s Milk Frog?'
       }
     };
     let language = null;
-    try { language = localStorage.getItem('naiwa-language'); } catch (_) {}
+    try { language = localStorage.getItem('milk-frog-language'); } catch (_) {}
     if (language !== 'en' && language !== 'zh') language = /^zh/i.test(navigator.language) ? 'zh' : 'en';
     const t = (key, vars={}) => (translations[language][key] || key).replace(/\{(\w+)\}/g, (_,name) => String(vars[name] ?? ''));
     let lastMessage = {key:'privacy', vars:{},type:''};
@@ -181,11 +276,13 @@
     function setLanguage(lang) {
       language = lang;
       document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-      try {localStorage.setItem('naiwa-language',lang);} catch (_) {}
+      try {localStorage.setItem('milk-frog-language',lang);} catch (_) {}
       $('langZh').setAttribute('aria-pressed',String(lang==='zh'));
       $('langEn').setAttribute('aria-pressed',String(lang==='en'));
       document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
       document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label',t(el.dataset.i18nAria)); });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder)); });
+      if (typeof renderCampusCards === 'function') renderCampusCards();
       document.title = location.search.includes('report=1') ? t('qrPageTitle') : "Where's Milk Frog? · " + (lang==='zh'?'奶蛙旅行地图':'Milk Frog Tracker');
       if (records.length) updateListAndMap();
       if (pendingLocation) $('previewAccuracy').textContent=t('previewAccuracy',{meters:Math.round(pendingLocation.accuracy_m)});
@@ -305,12 +402,95 @@
       message('reportSuccess',{},'ok');
       await loadReports();
     });
+
+    // Campus cards: anonymous visitor INSERT is always pending; RLS publishes only approved rows.
+    const CAMPUS_TABLE = 'campus_cards';
+    const FLAG_TABLE = 'campus_card_flags';
+    let approvedCampusCards = [];
+    const categoryKeys = {study:'categoryStudy',resources:'categoryResources',food:'categoryFood',tip:'categoryTip',fun:'categoryFun'};
+    const reasonKeys = {spam:'reportSpam',offensive:'reportOffensive',privacy:'reportPrivacy',inaccurate:'reportInaccurate',other:'reportOther'};
+    const cardMessage = (key, vars={}, type='') => {
+      const box = $('campusFormMessage');
+      box.textContent=t(key,vars);
+      box.className='msg'+(type?' '+type:'');
+    };
+    function showCardsError(key, vars={}) {
+      const el=$('cardsMessage');
+      el.style.display='block';
+      el.textContent=t(key, vars);
+      el.className='msg error';
+    }
+    function renderCampusCards(){
+      const host=$('campusCardList');
+      if(!host) return;
+      host.replaceChildren();
+      if(!approvedCampusCards.length) {
+        const p=document.createElement('p'); p.className='help'; p.textContent=t('noCards'); host.appendChild(p);
+        return;
+      }
+      for(const card of approvedCampusCards){
+        const el=document.createElement('article'); el.className='mini-card';
+        const header=document.createElement('div');header.className='card-meta';
+        const building=document.createElement('strong');building.textContent='📍 '+card.building_name;
+        const topic=document.createElement('span');topic.className='topic';topic.textContent=t(categoryKeys[card.category]||'categoryTip');
+        header.append(building,topic);
+        const heading=document.createElement('h3');heading.textContent=card.title;
+        const body=document.createElement('div');body.className='body';body.textContent=card.body;
+        const meta=document.createElement('div');meta.className='card-meta';
+        const time=document.createElement('span');time.textContent=t('cardPosted',{date:fmt(card.created_at)});
+        meta.append(time);
+        const controls=document.createElement('div');controls.className='flag-tools';
+        const reason=document.createElement('select');reason.setAttribute('aria-label',t('reportReasonLabel'));
+        for(const [value,key] of Object.entries(reasonKeys)){
+          const opt=document.createElement('option');opt.value=value;opt.textContent=t(key);reason.appendChild(opt);
+        }
+        const flag=document.createElement('button');flag.type='button';flag.textContent=t('sendReport');
+        const feedback=document.createElement('span');feedback.className='tiny';
+        flag.addEventListener('click',async()=>{
+          if(!dataClient) return;
+          flag.disabled=true;
+          const {error}=await dataClient.from(FLAG_TABLE).insert([{card_id:card.id,reason:reason.value}]);
+          if(error){feedback.textContent=t('reportFailed',{error:error.message});flag.disabled=false;}
+          else { feedback.textContent=t('reportThanks'); }
+        });
+        controls.append(reason,flag,feedback);
+        el.append(header,heading,body,meta,controls);
+        host.appendChild(el);
+      }
+    }
+    async function loadCampusCards(){
+      if(!dataClient) return;
+      const {data,error}=await dataClient.from(CAMPUS_TABLE)
+        .select('id,building_name,category,title,body,created_at')
+        .order('created_at',{ascending:false}).limit(60);
+      if(error){showCardsError('cardsLoadFail',{error:error.message});return;}
+      $('cardsMessage').style.display='none';
+      approvedCampusCards=data||[];
+      renderCampusCards();
+    }
+    $('campusForm').addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(!dataClient){cardMessage('notConfigured',{},'error');return;}
+      if(!$('agreeRules').checked){cardMessage('cardRulesRequired',{},'error');return;}
+      const item={building_name:$('buildingName').value.trim(),category:$('campusCategory').value,
+        title:$('campusTitle').value.trim(),body:$('campusBody').value.trim()};
+      if(item.building_name.length<2||item.title.length<3||item.body.length<15){cardMessage('cardTooShort',{},'error');return;}
+      $('sendCampusCard').disabled=true;
+      cardMessage('cardSending');
+      const {error}=await dataClient.from(CAMPUS_TABLE).insert([item]);
+      $('sendCampusCard').disabled=false;
+      if(error){cardMessage('cardSendFail',{error:error.message},'error');return;}
+      $('campusForm').reset();
+      cardMessage('cardSuccess',{},'ok');
+      // Pending rows are not returned to the visitor, intentionally.
+    });
+
     setLanguage(language);
     if(location.search.includes('report=1')){
       setTimeout(()=>$('checkinCard').scrollIntoView({behavior:'smooth',block:'start'}),500);
     }
     if(!configured){message('demo');}
-    else{loadReports();setInterval(loadReports,30000);}
+    else{loadReports();loadCampusCards();setInterval(loadReports,30000);setInterval(loadCampusCards,90000);}
   </script>
 </body>
 </html>
