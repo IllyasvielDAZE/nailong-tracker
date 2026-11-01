@@ -1,2 +1,2 @@
 # Milk Frog-tracker
-Track your nailong in SBU
+Track your milk frog in SBU
